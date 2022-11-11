@@ -16,4 +16,8 @@ public interface TrafficManagerClient {
 
     @GetMapping("/semaforo/{identificador}")
     CadastroArduinoResponse pegarSemaforo (@PathVariable String identificador);
+
+    @GetMapping("/camera/{trueOuFalse}")
+    Boolean cameraSemaforoTemCarro(@PathVariable Boolean trueOuFalse);
+
 }

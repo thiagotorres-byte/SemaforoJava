@@ -3,20 +3,18 @@ package br.com.arduino.service;
 import br.com.arduino.DTO.CadastroArduinoRequest;
 import br.com.arduino.DTO.CadastroArduinoResponse;
 import br.com.arduino.feign.TrafficManagerClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ArduinoService {
 
-    public static void main(String[] args) throws InterruptedException {
+    @Autowired
+    TrafficManagerClient client;
 
-        TrafficManagerClient client;
+    public void chamaArduino() throws InterruptedException {
 
         String nomeSemaforo;
-
-        String url = "http://localhost:8080/semaforo";
-
-        String urlNovosTempos = "http://localhost:8080/tempoSemaforo/";
 
         CadastroArduinoRequest jsonRequest = CadastroArduinoRequest
                 .builder()
@@ -25,9 +23,7 @@ public class ArduinoService {
                 .tempoInverso(false)
                 .build();
 
-
         CadastroArduinoResponse novosTempos = client.criarSemaforo(jsonRequest);
-
 
         while (true) {
 
@@ -49,8 +45,8 @@ public class ArduinoService {
 
             Thread.sleep(novosTempos.getTempoVermelho());
 
-            if (get("http://localhost:8080/camera")){
-                novosTempos = client.pegarSemaforo(jsonRequest.getIdentificador());
+            if (client.cameraSemaforoTemCarro(true)){
+                Thread.sleep(10000);
             }
 
         }
