@@ -3,51 +3,75 @@ package br.com.arduino.service;
 import br.com.arduino.DTO.CadastroArduinoRequest;
 import br.com.arduino.DTO.CadastroArduinoResponse;
 import br.com.arduino.feign.TrafficManagerClient;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+
 @Service
+@Log4j2
 public class ArduinoService {
 
     @Autowired
-    TrafficManagerClient client;
+    Environment environment;
 
+    private final TrafficManagerClient client;
+
+    public ArduinoService(TrafficManagerClient client) {
+        this.client = client;
+    }
+
+    static int tempPlus = 0;
+
+    @Scheduled(initialDelay = 1000, fixedDelay=Long.MAX_VALUE)
     public void chamaArduino() throws InterruptedException {
 
         String nomeSemaforo;
 
+        Random random = new Random();
+        String port = environment.getProperty("local.server.port");
         CadastroArduinoRequest jsonRequest = CadastroArduinoRequest
                 .builder()
-                .identificador("teste")
-                .identificadorSemaforoPrincipal("")
-                .tempoInverso(false)
+                .identificador("2")
+                .identificadorSemaforoPrincipal("1")
+                .tempoInverso(random.nextBoolean())
                 .build();
 
-        CadastroArduinoResponse novosTempos = client.criarSemaforo(jsonRequest);
+        log.info("criando semaforo: {}", jsonRequest.toString());
+        CadastroArduinoResponse novosTempos = client.criarSemaforo(jsonRequest, port);
+        log.info("retorno semaforo: {}", novosTempos.toString());
+
+
 
         while (true) {
 
-            System.out.println("Luz vermelha apagada");
+            log.info("Luz vermelha apagada");
 
-            System.out.println("Luz verde ligada");
+            log.info("Luz verde ligada");
 
             Thread.sleep(novosTempos.getTempoVerde());
 
-            System.out.println("Luz verde apagada");
+            log.info("Luz verde apagada");
 
-            System.out.println("Luz amarela ligada");
+            log.info("Luz amarela ligada");
 
             Thread.sleep(novosTempos.getTempoAmarelo());
 
-            System.out.println("Luz amarela apagada");
+            log.info("Luz amarela apagada");
 
-            System.out.println("Luz vermelha ligada");
+            log.info("Luz vermelha ligada");
 
-            Thread.sleep(novosTempos.getTempoVermelho());
+            Thread.sleep(novosTempos.getTempoVermelho() + tempPlus);
 
-            if (client.cameraSemaforoTemCarro(true)){
-                Thread.sleep(10000);
-            }
+//            if (client.cameraSemaforoTemCarro(true)){
+//                Thread.sleep(10000);
+//            }
 
         }
     }
