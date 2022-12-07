@@ -5,9 +5,6 @@ import br.com.arduino.DTO.CadastroArduinoResponse;
 import br.com.arduino.feign.TrafficManagerClient;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,15 +24,13 @@ public class ArduinoService {
         this.client = client;
     }
 
-    static int tempPlus = 0;
-
     @Scheduled(initialDelay = 1000, fixedDelay=Long.MAX_VALUE)
     public void chamaArduino() throws InterruptedException {
 
-        String nomeSemaforo;
-
         Random random = new Random();
+
         String port = environment.getProperty("local.server.port");
+
         CadastroArduinoRequest jsonRequest = CadastroArduinoRequest
                 .builder()
                 .identificador("2")
@@ -46,8 +41,6 @@ public class ArduinoService {
         log.info("criando semaforo: {}", jsonRequest.toString());
         CadastroArduinoResponse novosTempos = client.criarSemaforo(jsonRequest, port);
         log.info("retorno semaforo: {}", novosTempos.toString());
-
-
 
         while (true) {
 
@@ -67,12 +60,14 @@ public class ArduinoService {
 
             log.info("Luz vermelha ligada");
 
-            Thread.sleep(novosTempos.getTempoVermelho() + tempPlus);
+            Thread.sleep(novosTempos.getTempoVermelho());
 
-//            if (client.cameraSemaforoTemCarro(true)){
-//                Thread.sleep(10000);
-//            }
+//            client.cameraSemaforoTemCarro(false)
 
+            if (true){
+                client.adicionaSegundos(jsonRequest.getIdentificador(), 10000);
+                Thread.sleep(10000);
+            }
         }
     }
 }

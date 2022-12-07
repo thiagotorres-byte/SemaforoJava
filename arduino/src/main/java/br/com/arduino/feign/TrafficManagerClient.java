@@ -2,11 +2,9 @@ package br.com.arduino.feign;
 
 import br.com.arduino.DTO.CadastroArduinoRequest;
 import br.com.arduino.DTO.CadastroArduinoResponse;
+import br.com.arduino.DTO.SemaforoOutputDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name="trafficManager", url = "http://localhost:8080")
 public interface TrafficManagerClient {
@@ -19,5 +17,8 @@ public interface TrafficManagerClient {
 
     @GetMapping("/camera/{trueOuFalse}")
     Boolean cameraSemaforoTemCarro(@PathVariable Boolean trueOuFalse);
+
+    @PutMapping("/semaforo/{identificador}/{tempo}/")
+    SemaforoOutputDTO adicionaSegundos(@PathVariable String identificador, @PathVariable int tempo);
 
 }
